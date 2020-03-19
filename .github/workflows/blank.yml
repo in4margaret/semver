@@ -1,0 +1,25 @@
+name: GitVersion
+
+on: [push]
+
+jobs:
+  build:
+    name: Build Code
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: fetch
+      run: git fetch --unshallow
+      
+    - name: Get Git Version
+      uses: docker://gittools/gitversion:5.0.2-linux-centos-7-netcoreapp2.2
+      with:
+        args: /github/workspace /nofetch /exec /bin/sh /execargs "-c \"echo $GitVersion_FullSemVer > /github/workspace/version.txt\""
+
+    - name: FULL_SEM_VER env
+      run: | 
+        temp=$(echo "$(cat version.txt)"  | sed 's/[\.\+]/-/g')
+        echo "::set-env name=FULL_SEM_VER::$(echo $temp)" 
+
